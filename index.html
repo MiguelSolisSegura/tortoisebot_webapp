@@ -2,8 +2,7 @@
 
 <head>
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-     crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <!-- ROS stuff -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/easeljs/lib/easeljs.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/eventemitter2/lib/eventemitter2.min.js"></script>
@@ -25,60 +24,86 @@
             background-color: #121212;
             color: #e0e0e0;
         }
+
         .card {
             background-color: #1e1e1e;
             border: 1px solid #333;
         }
-        .card-header, .card-body {
+
+        .card-header,
+        .card-body {
             color: #e0e0e0;
         }
+
         .btn-success {
             background-color: #1e1e1e;
             border-color: #28a745;
         }
+
         .btn-danger {
             background-color: #1e1e1e;
             border-color: #dc3545;
         }
+
         .text-danger {
             color: #dc3545 !important;
         }
+
         .text-success {
             color: #28a745 !important;
         }
+
         input {
             background-color: #333;
             color: #e0e0e0;
             border: 1px solid #555;
         }
+
         .input-group-text {
             background-color: #333;
             color: #e0e0e0;
             border: 1px solid #555;
         }
+
         .console {
             background-color: #000;
             color: #00ff00;
             font-family: monospace;
             padding: 10px;
-            height: 200px;
+            height: 220px;
             overflow-y: auto;
             border: 1px solid #333;
             text-align: left;
         }
+
         .led-indicator {
             display: inline-block;
-            width: 40px;
+            width: 20px;
             height: 20px;
             margin-left: 10px;
-            border-radius: 20%;
+            border-radius: 100%;
         }
+
         .led-green {
-            background-color: #00ff3c; /* Green color for connected */
+            background-color: #00ff3c;
+            /* Green color for connected */
         }
+
         .led-red {
             background-color: #1e1e1e;
             border: 1px solid rgb(255, 255, 255);
+        }
+
+        /* Reduce padding/margins for columns */
+        .col-3,
+        .col-6 {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .row {
+            margin-left: -5px;
+            margin-right: -5px;
         }
     </style>
 </head>
@@ -90,12 +115,12 @@
                 <div class="card mt-2">
                     <div class="card-body">
                         <h3>Connection Status <span :class="connected ? 'led-green' : 'led-red'" class="led-indicator"></span></h3>
-                        <label>ROSBridge address</label>
                         <br>
-                        <input type="text" v-model="rosbridge_address" />
+                        <label>ROSBridge Address</label>
+                        <br>
+                        <input type="text" v-model="rosbridge_address" style="width: 100%;"/>
                         <br><br>
-                        <button :disabled="loading" class="btn btn-danger" @click="disconnect"
-                            v-if="connected">Disconnect</button>
+                        <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect</button>
                         <button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect</button>
                     </div>
                 </div>
@@ -107,6 +132,27 @@
                         <p v-for="log in logs">{{ log }}</p>
                     </div>
                 </div>
+            </div>
+            <div class="col-6 text-center">
+                <div class="card mt-2">
+                    <div class="card-body">
+                        <div id="divCamera"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3 text-center">
+                <div class="card mt-2">
+                    <div class="card-header">
+                        <h4>Automatic Control</h4>
+                    </div>
+                    <div class="card-body">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-3 text-center">
                 <div class="card mt-2">
                     <div class="card-header">
                         <h4>Robot 3D Model</h4>
@@ -116,38 +162,23 @@
                     </div>
                 </div>
             </div>
-            <div class="col-9">
-                <div class="row">
-                    <div class="col-6 text-center">
-                        <div class="card mt-2">
-                            <div class="card-body">
-                                <div id="divCamera"></div>
-                            </div>
-                        </div>
+            <div class="col-6 text-center">
+                <div class="card mt-2">
+                    <div class="card-header">
+                        <h4>Generated Map</h4>
                     </div>
-                    <div class="col-6">
-                        
+                    <div class="card-body">
+                        <div id="map"></div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-6 text-center">
-                        <div class="card mt-2">
-                            <div class="card-header">
-                                <h4>Generated Map</h4>
-                            </div>
-                            <div class="card-body">
-                                <div id="map"></div>
-                            </div>
-                        </div>
+            </div>
+            <div class="col-3 text-center">
+                <div class="card mt-2">
+                    <div class="card-header">
+                        <h4>Manual Control</h4>
                     </div>
-                    <div class="col-6 text-center">
-                        <div class="card mt-2">
-                            <div class="card-header">
-                                <h4>Commands</h4>
-                            </div>
-                            <div class="card-body">
-                            </div>
-                        </div>
+                    <div class="card-body">
+
                     </div>
                 </div>
             </div>
