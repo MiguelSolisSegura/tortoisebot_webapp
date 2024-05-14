@@ -63,7 +63,7 @@ var app = new Vue({
         },
         setup3DViewer() {
             this.viewer = new ROS3D.Viewer({
-                background: '#000000',
+                background: '#1e1e1e',
                 divID: 'div3DViewer',
                 width: 400,
                 height: 300,
@@ -74,8 +74,8 @@ var app = new Vue({
             // Add a grid.
             this.viewer.addObject(new ROS3D.Grid({
                 color:'#00ff00',
-                cellSize: 0.5,
-                num_cells: 20
+                cellSize: 0.25,
+                num_cells: 200
             }))
 
             // Setup a client to listen to TFs.

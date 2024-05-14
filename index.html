@@ -31,7 +31,7 @@
             color: #e0e0e0;
         }
         .btn-success {
-            background-color: #28a745;
+            background-color: #1e1e1e;
             border-color: #28a745;
         }
         .btn-danger {
@@ -105,18 +105,19 @@
                         <p v-for="log in logs">{{ log }}</p>
                     </div>
                 </div>
+                <div class="card mt-2">
+                    <div class="card-header">
+                        <h4>Robot 3D Model</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="div3DViewer"></div>
+                    </div>
+                </div>
             </div>
             <div class="col-9">
                 <div class="row">
                     <div class="col-4">
-                        <div class="card mt-2">
-                            <div class="card-header">
-                                <h4>Robot model</h4>
-                            </div>
-                            <div class="card-body">
-                                <div id="div3DViewer"></div>
-                            </div>
-                        </div>
+                        
                     </div>
                     <div class="col-8">
                         <div class="card mt-2">
