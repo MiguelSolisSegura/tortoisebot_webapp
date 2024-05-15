@@ -6,7 +6,7 @@ var app = new Vue({
         ros: null,
         logs: [],
         loading: false,
-        rosbridge_address: 'wss://i-0ae8a02d43838e4e7.robotigniteacademy.com/a935d696-2294-49ce-9c82-0601497e708b/rosbridge/',
+        rosbridge_address: 'wss://i-01796c58a5faa7ac4.robotigniteacademy.com/a8025984-3935-4891-ae37-91213c659b7f/rosbridge/',
         port: '9090',
         goal: null,
         action: {
@@ -185,8 +185,8 @@ var app = new Vue({
             let viewer = new MJPEGCANVAS.Viewer({
                 divID: 'divCamera',
                 host: host,
-                width: 640,
-                height: 480,
+                width: 480,
+                height: 360,
                 topic: '/camera/image_raw',
                 ssl: true,
             })

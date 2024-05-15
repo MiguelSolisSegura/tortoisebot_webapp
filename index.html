@@ -21,18 +21,42 @@
     <script type="text/javascript" src="mjpegcanvas.min.js"></script>
 
     <style>
-        body {
+        html, body {
+            height: 100%;
+            margin: 0;
             background-color: #121212;
             color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container-fluid {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row {
+            flex: 1;
+            display: flex;
+            margin: 0;
+        }
+
+        .col-3, .col-6 {
+            display: flex;
+            flex-direction: column;
         }
 
         .card {
             background-color: #1e1e1e;
             border: 1px solid #333;
+            /*margin-bottom: 1rem;*/
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        .card-header,
-        .card-body {
+        .card-header, .card-body {
             color: #e0e0e0;
         }
 
@@ -91,6 +115,7 @@
             overflow-y: auto;
             border: 1px solid #333;
             text-align: left;
+            flex: 1;
         }
 
         .led-indicator {
@@ -112,8 +137,7 @@
         }
 
         /* Reduce padding/margins for columns */
-        .col-3,
-        .col-6 {
+        .col-3, .col-6 {
             padding-left: 5px;
             padding-right: 5px;
         }
@@ -131,9 +155,7 @@
         .velocity-card h1 {
             font-size: 2rem;
         }
-    </style>
 
-    <style type="text/css">
         #dragstartzone {
             position: relative;
             display: inline-block;
@@ -162,7 +184,6 @@
             background-color: rgb(0, 255, 0);
         }
     </style>
-
 </head>
 
 <body>
@@ -189,11 +210,54 @@
                         <p v-for="log in logs">{{ log }}</p>
                     </div>
                 </div>
+                <div class="card mt-2">
+                    <div class="card-header">
+                        <h4>Robot 3D Model</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="div3DViewer"></div>
+                    </div>
+                </div>
             </div>
             <div class="col-6 text-center">
                 <div class="card mt-2">
-                    <div class="card-body">
+                    <div class="card-body" style="display: flex; justify-content: center; align-items: center;">
                         <div id="divCamera"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 text-center">
+                        <div class="card mt-2">
+                            <div class="card-header">
+                                <h4>Generated Map</h4>
+                            </div>
+                            <div class="card-body" style="display: flex; justify-content: center; align-items: center;">
+                                <div id="map"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card mt-2">
+                            <div class="card-body text-center">
+                                <h4 class="text-center">Manual Control</h4>
+                                <div class="card-body" style="align-items: center;">
+                                    <div class="row justify-content-center align-items-center" style="margin-top: 20px;">
+                                        <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"></div>
+                                        <div id="dragCircle" :style="dragCircleStyle"></div>
+                                    </div>
+                                    <div class="row" style="margin-top: 20px;">
+                                        <div class="col-6">
+                                            <h5>Linear X</h5>
+                                            <h5>{{ 1 * joystick.vertical.toFixed(3) }} m/s</h5>
+                                        </div>
+                                        <div class="col-6">
+                                            <h5>Angular Z</h5>
+                                            <h5>{{ -joystick.horizontal.toFixed(3) }} rad/s</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -204,72 +268,26 @@
                     </div>
                     <div class="card-body">
                         <div>
-                            <label>Current Goal: (X: {{ action.goal.position.x }}, Y: {{ action.goal.position.y }})</label>
-                            <div>
-                                <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.65, -0.5)">X: 0.65, Y: -0.5</button>
-                                <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.65, 0.45)">X: 0.65, Y: 0.45</button>
-                                <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.25, 0.45)">X: 0.25, Y: 0.45</button>
-                            </div>
-                            <button :disabled="!connected || action.status.status == 1" class="btn btn-success btn-block mt-2" @click="sendGoal">Start</button>
-                            <button :disabled="!connected || ![1].includes(action.status.status)" class="btn btn-danger btn-block mt-2" @click="cancelGoal">Cancel</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.65, -0.5)">Waypoint 1:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: &nbsp;0.65, &nbsp;Y: -0.5</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.65, 0.45)">Waypoint 2:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: &nbsp;0.65, &nbsp;Y: &nbsp;0.45</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.25, 0.45)">Waypoint 3:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: &nbsp;0.25, &nbsp;Y: &nbsp;0.45</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.25, 0.00)">Waypoint 4:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: &nbsp;0.25, &nbsp;Y: &nbsp;0.00</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(-0.15, 0.00)">Waypoint 5:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.15,      &nbsp;Y: &nbsp;0.00</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(-0.15, 0.45)">Waypoint 6:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.15,      &nbsp;Y: &nbsp;0.45</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(-0.65, 0.45)">Waypoint 7:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.65,      &nbsp;Y: &nbsp;0.45</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(-0.15, -0.5)">Waypoint 8:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.15,      &nbsp;Y: -0.50</button>
+                            <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(-0.5, -0.5)">Waypoint 9:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X: -0.50,      &nbsp;Y: -0.50</button>
                         </div>
+                        <button :disabled="!connected || action.status.status == 1" class="btn btn-success btn-block mt-2" @click="sendGoal">Start</button>
+                        <button :disabled="!connected || ![1].includes(action.status.status)" class="btn btn-danger btn-block mt-2" @click="cancelGoal">Cancel</button>
                         <hr />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-3 text-center">
-                <div class="card mt-2">
-                    <div class="card-header">
-                        <h4>Robot 3D Model</h4>
-                    </div>
-                    <div class="card-body">
-                        <div id="div3DViewer"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-3 text-center">
-                <div class="card mt-2">
-                    <div class="card-header">
-                        <h4>Generated Map</h4>
-                    </div>
-                    <div class="card-body">
-                        <div id="map"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="card mt-2">
-                    <div class="card-body text-center">
-                        <h4 class="text-center">Manual Control</h4>
-                        <div class="row justify-content-center align-items-center" style="margin-top: 20px;">
-                            <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"></div>
-                            <div id="dragCircle" :style="dragCircleStyle"></div>
+                        <div class="card-body text-left">
+                            <h5>Current Goal: (X: {{ action.goal.position.x }}, Y: {{ action.goal.position.y }})</h5>
+                            
+                            <h5>State: {{ action.feedback.state }}</h5>
+                            <h5>Succeeded: {{ action.result.success }}</h5>
+                            <h5>Status: {{ action.status.text }}</h5>
                         </div>
-                        <div class="row" style="margin-top: 20px;">
-                            <div class="col-6">
-                                <h5>Linear X</h5>
-                                <h5>{{ 1 * joystick.vertical.toFixed(3) }} m/s</h5>
-                            </div>
-                            <div class="col-6">
-                                <h5>Angular Z</h5>
-                                <h5>{{ -joystick.horizontal.toFixed(3) }} rad/s</h5>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-3 text-center">
-                <div class="card mt-2 velocity-card">
-                    <div class="card-header">
-                        <h4>Action Server Feedback</h4>
-                    </div>
-                    <div class="card-body text-left">
-                        <p>Position: {{ action.feedback.position }}</p>
-                        <p>State: {{ action.feedback.state }}</p>
-                        <p>Succeeded: {{ action.result.success }}</p>
-                        <p> Status: {{ action.status.text }}</p>
                     </div>
                 </div>
             </div>
