@@ -106,6 +106,37 @@
             margin-right: -5px;
         }
     </style>
+
+    <style type="text/css">
+        #dragstartzone {
+            position: relative;
+            display: inline-block;
+            width: 200px;
+            height: 200px;
+            border: 1px solid #333;
+            border-radius: 50%;
+            z-index: 10;
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #dragCircle {
+            position: absolute;
+            z-index: 9;
+            border: 1px solid transparent;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 30%);
+            -moz-user-select: -moz-none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #dragCircle:hover {
+            background-color: rgb(128, 240, 143);
+        }
+    </style>
+
 </head>
 
 <body>
@@ -162,7 +193,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 text-center">
+            <div class="col-3 text-center">
                 <div class="card mt-2">
                     <div class="card-header">
                         <h4>Generated Map</h4>
@@ -172,13 +203,24 @@
                     </div>
                 </div>
             </div>
-            <div class="col-3 text-center">
+            <div class="col-3">
                 <div class="card mt-2">
-                    <div class="card-header">
-                        <h4>Manual Control</h4>
+                    <div class="card-body text-center">
+                        <h4 class="text-center">Joystick</h4>
+                        <hr>
+                        <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag">
+                        </div>
+                        <div id="dragCircle" :style="dragCircleStyle"></div>
                     </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <div class="card mt-2">
                     <div class="card-body">
-
+                        <hr />
+                        <h1>Linear X: {{  1*joystick.vertical.toFixed(3) }} m/s </h1>
+                        <br />
+                        <h1>Angular Z: {{ -joystick.horizontal.toFixed(3) }} m/s </h1>
                     </div>
                 </div>
             </div>
