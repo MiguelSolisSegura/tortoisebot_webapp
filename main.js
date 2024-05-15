@@ -6,8 +6,15 @@ var app = new Vue({
         ros: null,
         logs: [],
         loading: false,
-        rosbridge_address: 'wss://i-079f4164dcb2f0477.robotigniteacademy.com/60ddc83d-03e6-4561-97b7-e386adc5104c/rosbridge/',
+        rosbridge_address: 'wss://i-0ae8a02d43838e4e7.robotigniteacademy.com/a935d696-2294-49ce-9c82-0601497e708b/rosbridge/',
         port: '9090',
+        goal: null,
+        action: {
+            goal: { position: {x: 0, y: 0, z: 0} },
+            feedback: { position: 0, state: 'idle' },
+            result: { success: false },
+            status: { status: 0, text: '' },
+        },
         // Map properties
         mapViewer: null,
         mapGridClient: null,
@@ -62,7 +69,7 @@ var app = new Vue({
                 this.unset3DViewer()
                 document.getElementById('divCamera').innerHTML = ''
             })
-             this.mapViewer = new ROS2D.Viewer({
+            this.mapViewer = new ROS2D.Viewer({
                 divID: 'map',
                 width: 400,
                 height: 300
@@ -76,12 +83,13 @@ var app = new Vue({
             })
             // Scale the canvas to fit to the map
             this.mapGridClient.on('change', () => {
-                this.mapViewer.scaleToDimensions(this.mapGridClient.currentGrid.width, this.mapGridClient.currentGrid.height);
-                this.mapViewer.shift(this.mapGridClient.currentGrid.pose.position.x, this.mapGridClient.currentGrid.pose.position.y)
+                this.mapViewer.scaleToDimensions(0.15 * this.mapGridClient.currentGrid.width, 0.15 * this.mapGridClient.currentGrid.height);
+                this.mapViewer.shift(0.15 * this.mapGridClient.currentGrid.pose.position.x, 0.15 * this.mapGridClient.currentGrid.pose.position.y)
             })
         },
         disconnect: function() {
             this.ros.close()
+            this.goal = null
         },
         publish: function() {
             let topic = new ROSLIB.Topic({
@@ -94,6 +102,37 @@ var app = new Vue({
                 angular: { x: 0, y: 0, z: -this.joystick.horizontal, },
             })
             topic.publish(message)
+        },
+        sendGoal: function() {
+            let actionClient = new ROSLIB.ActionClient({
+                ros : this.ros,
+                serverName : '/tortoisebot_as',
+                actionName : 'course_web_dev_ros/WaypointActionAction'
+            })
+
+            this.goal = new ROSLIB.Goal({
+                actionClient : actionClient,
+                goalMessage: {
+                    ...this.action.goal
+                }
+            })
+
+            this.goal.on('status', (status) => {
+                this.action.status = status
+            })
+
+            this.goal.on('feedback', (feedback) => {
+                this.action.feedback = feedback
+            })
+
+            this.goal.on('result', (result) => {
+                this.action.result = result
+            })
+
+            this.goal.send()
+        },
+        cancelGoal: function() {
+            this.goal.cancel()
         },
         setup3DViewer() {
             this.viewer = new ROS3D.Viewer({
@@ -202,6 +241,10 @@ var app = new Vue({
         resetJoystickVals() {
             this.joystick.vertical = 0
             this.joystick.horizontal = 0
+        },
+        setGoal: function(x, y) {
+            this.action.goal.position.x = x;
+            this.action.goal.position.y = y;
         },
     },
     mounted() {

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -36,13 +37,29 @@
         }
 
         .btn-success {
-            background-color: #1e1e1e;
+            background-color: #28a745;
             border-color: #28a745;
         }
 
         .btn-danger {
-            background-color: #1e1e1e;
+            background-color: #dc3545;
             border-color: #dc3545;
+        }
+
+        .btn-waypoint {
+            background-color: #c5c5c5;
+            border-color: #ffffff;
+            box-shadow: 0px 4px 8px rgba(166, 255, 0, 0.1);
+        }
+
+        .btn-waypoint:hover {
+            background-color: #1e1e1e;
+            color: #00ff2a;
+        }
+
+        .btn-waypoint:active {
+            background-color: #1e1e1e;
+            color: #00ff2a;
         }
 
         .text-danger {
@@ -105,6 +122,15 @@
             margin-left: -5px;
             margin-right: -5px;
         }
+
+        /* Additional styles */
+        .velocity-card {
+            margin-top: 20px;
+        }
+
+        .velocity-card h1 {
+            font-size: 2rem;
+        }
     </style>
 
     <style type="text/css">
@@ -113,7 +139,7 @@
             display: inline-block;
             width: 200px;
             height: 200px;
-            border: 1px solid #333;
+            border: 2px solid rgb(255, 255, 255);
             border-radius: 50%;
             z-index: 10;
             -moz-user-select: -moz-none;
@@ -126,14 +152,14 @@
             z-index: 9;
             border: 1px solid transparent;
             border-radius: 50%;
-            background-color: rgba(0, 0, 0, 30%);
+            background-color: rgb(0, 0, 0);
             -moz-user-select: -moz-none;
             -khtml-user-select: none;
             -webkit-user-select: none;
         }
 
         #dragCircle:hover {
-            background-color: rgb(128, 240, 143);
+            background-color: rgb(0, 255, 0);
         }
     </style>
 
@@ -149,7 +175,7 @@
                         <br>
                         <label>ROSBridge Address</label>
                         <br>
-                        <input type="text" v-model="rosbridge_address" style="width: 100%;"/>
+                        <input type="text" v-model="rosbridge_address" style="width: 100%;" />
                         <br><br>
                         <button :disabled="loading" class="btn btn-danger" @click="disconnect" v-if="connected">Disconnect</button>
                         <button :disabled="loading" class="btn btn-success" @click="connect" v-else>Connect</button>
@@ -177,7 +203,17 @@
                         <h4>Automatic Control</h4>
                     </div>
                     <div class="card-body">
-
+                        <div>
+                            <label>Current Goal: (X: {{ action.goal.position.x }}, Y: {{ action.goal.position.y }})</label>
+                            <div>
+                                <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.65, -0.5)">X: 0.65, Y: -0.5</button>
+                                <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.65, 0.45)">X: 0.65, Y: 0.45</button>
+                                <button class="btn btn-waypoint btn-block mt-2" @click="setGoal(0.25, 0.45)">X: 0.25, Y: 0.45</button>
+                            </div>
+                            <button :disabled="!connected || action.status.status == 1" class="btn btn-success btn-block mt-2" @click="sendGoal">Start</button>
+                            <button :disabled="!connected || ![1].includes(action.status.status)" class="btn btn-danger btn-block mt-2" @click="cancelGoal">Cancel</button>
+                        </div>
+                        <hr />
                     </div>
                 </div>
             </div>
@@ -206,21 +242,34 @@
             <div class="col-3">
                 <div class="card mt-2">
                     <div class="card-body text-center">
-                        <h4 class="text-center">Joystick</h4>
-                        <hr>
-                        <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag">
+                        <h4 class="text-center">Manual Control</h4>
+                        <div class="row justify-content-center align-items-center" style="margin-top: 20px;">
+                            <div id="dragstartzone" @mousedown="startDrag" @mousemove="doDrag"></div>
+                            <div id="dragCircle" :style="dragCircleStyle"></div>
                         </div>
-                        <div id="dragCircle" :style="dragCircleStyle"></div>
+                        <div class="row" style="margin-top: 20px;">
+                            <div class="col-6">
+                                <h5>Linear X</h5>
+                                <h5>{{ 1 * joystick.vertical.toFixed(3) }} m/s</h5>
+                            </div>
+                            <div class="col-6">
+                                <h5>Angular Z</h5>
+                                <h5>{{ -joystick.horizontal.toFixed(3) }} rad/s</h5>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-3">
-                <div class="card mt-2">
-                    <div class="card-body">
-                        <hr />
-                        <h1>Linear X: {{  1*joystick.vertical.toFixed(3) }} m/s </h1>
-                        <br />
-                        <h1>Angular Z: {{ -joystick.horizontal.toFixed(3) }} m/s </h1>
+            <div class="col-3 text-center">
+                <div class="card mt-2 velocity-card">
+                    <div class="card-header">
+                        <h4>Action Server Feedback</h4>
+                    </div>
+                    <div class="card-body text-left">
+                        <p>Position: {{ action.feedback.position }}</p>
+                        <p>State: {{ action.feedback.state }}</p>
+                        <p>Succeeded: {{ action.result.success }}</p>
+                        <p> Status: {{ action.status.text }}</p>
                     </div>
                 </div>
             </div>
